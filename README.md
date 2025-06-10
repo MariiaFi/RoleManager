@@ -1,42 +1,68 @@
-# RoleManager.sol
+# Solidity Access Control Suite
 
-Custom Role-Based Access Control (RBAC) smart contract written in Solidity 0.8.30 without relying on OpenZeppelin.
-
-This contract defines a basic role management system with three access levels: `ADMIN`, `MODERATOR`, and `USER`. It uses `enum`, `custom errors`, and `events` for clear access logic and gas-efficient execution.
+A two-contract project written in Solidity 0.8.30 that demonstrates how to implement a custom role-based access control system and use it to secure a decentralized notes application.
 
 ---
 
-## Features
+## Contracts Overview
 
-- Custom roles: `NONE`, `USER`, `MODERATOR`, `ADMIN`
-- Role assignment and revocation by admins
-- Uses `enum` and `custom error` for better readability and gas optimization
-- Emits events on role changes
-- Includes `onlyAdmin` modifier for access-restricted functions
+### RoleManager.sol
+
+A lightweight role management system with the following features:
+
+- Roles: `NONE`, `USER`, `MODERATOR`, `ADMIN`
+- `assignRole(address, Role)` – Assign role (admin-only)
+- `revokeRole(address)` – Remove role (admin-only)
+- `myRole()` – Get caller's current role
+- Custom errors and event logs
+
+### SecureNotes.sol
+
+A secure note-taking contract with role-based permissions:
+
+- Requires role `USER` or higher to create a note
+- Users can read their own notes
+- Only `MODERATOR` or `ADMIN` can delete notes of any user
+- Reads roles from the external `RoleManager` contract
 
 ---
 
-## Solidity Version
+##  How to Use in Remix
 
-```solidity
-pragma solidity ^0.8.30;
-```
-## Contract Interface
-```
-function assignRole(address user, Role newRole) external onlyAdmin;
-function revokeRole(address user) external onlyAdmin;
-function getRole(address user) external view returns (Role);
-function isAdmin(address user) external view returns (bool);
-function isModerator(address user) external view returns (bool);
-function myRole() external view returns (Role);
-```
-## Future Improvements
-- Add per-function permissions
-- Add dynamic permission groups
-- Integration with frontend (React/Next.js dApp)
-- Deploy to Sepolia or Base testnet
+1. **Deploy `RoleManager.sol`**
+   - You become `ADMIN` automatically
 
-Author
-Mariia Fialkovska - Junior Solidity Developer 
-[LinkedIn Profile](https://www.linkedin.com/in/mariia-fialkovska-78857b234/)
-Part of the #100DaysOfSolidity challenge.
+2. **Deploy `SecureNotes.sol`**
+   - Paste the address of the deployed `RoleManager` into the constructor
+
+3. **Assign roles**
+   - Call `assignRole(address, 1)` to make someone a `USER`
+
+4. **Create & manage notes**
+   - Use `createNote("Your text here")` to store notes
+   - Use `getMyNotes()` to view
+   - `deleteNote(address, index)` (for mods/admins only)
+
+---
+
+## Roles
+
+| Role       | Numeric | Permissions             |
+|------------|---------|-------------------------|
+| NONE       | 0       | No access               |
+| USER       | 1       | Can create/read notes   |
+| MODERATOR  | 2       | Can delete any notes    |
+| ADMIN      | 3       | Full access + manage roles |
+
+---
+
+## Author
+
+**Mariia Fialkovska**  
+Solidity Developer — [LinkedIn](https://www.linkedin.com/in/mariia-fialkovska-78857b234/)  
+
+---
+
+## License
+
+MIT
