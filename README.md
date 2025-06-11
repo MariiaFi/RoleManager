@@ -1,6 +1,6 @@
 # Solidity Access Control Suite
 
-A two-contract project written in Solidity 0.8.30 that demonstrates how to implement a custom role-based access control system and use it to secure a decentralized notes application.
+A three-contract project written in Solidity 0.8.30 that demonstrates how to implement a custom role-based access control system and use it to secure a decentralized notes application.
 
 ---
 
@@ -25,6 +25,15 @@ A secure note-taking contract with role-based permissions:
 - Only `MODERATOR` or `ADMIN` can delete notes of any user
 - Reads roles from the external `RoleManager` contract
 
+### TimeLockedMessages.sol
+
+A smart contract that allows users to submit messages with an unlock timestamp.
+
+- `USER` and higher roles can submit messages
+- Messages are hidden until `unlockTime`
+- `ADMIN` can read any message immediately
+- Demonstrates use of `block.timestamp` and role-based access in combination
+
 ---
 
 ##  How to Use in Remix
@@ -43,6 +52,17 @@ A secure note-taking contract with role-based permissions:
    - Use `getMyNotes()` to view
    - `deleteNote(address, index)` (for mods/admins only)
 
+5. **Deploy `TimeLockedMessages.sol`**
+   - Provide the same `RoleManager` address in the constructor
+
+6. **Submit a time-locked message**
+   - Use `submitMessage("Secret", futureTimestamp)` with a future `unlockTime`
+
+7. **Read messages**
+   - `readMyMessage(index)` – works only after unlock time
+   - `readAsAdmin(user, index)` – bypasses time (admin-only)
+
+
 ---
 
 ## Roles
@@ -50,9 +70,16 @@ A secure note-taking contract with role-based permissions:
 | Role       | Numeric | Permissions             |
 |------------|---------|-------------------------|
 | NONE       | 0       | No access               |
-| USER       | 1       | Can create/read notes   |
+|------------|---------|-------------------------|
+| USER       | 1       | Can create/read notes,  |
+|            |         |  submit time-locked     |
+|            |         |  messages               |
+|------------|---------|-------------------------|
 | MODERATOR  | 2       | Can delete any notes    |
-| ADMIN      | 3       | Full access + manage roles |
+|------------|---------|-------------------------|
+| ADMIN      | 3       | Full access + read      |
+|            |         |  locked messages +      |
+|            |         | manage roles            |  
 
 ---
 
