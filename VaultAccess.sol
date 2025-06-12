@@ -4,7 +4,7 @@ pragma solidity ^0.8.30;
 import "./RoleManager.sol";
 
 /// @title VaultAccess
-/// @notice Контракт ограниченного доступа к "сундуку" раз в сутки для USER и управления пополнением MODERATOR
+/// @notice A role-based vault access system with daily claim limits
 contract VaultAccess {
     RoleManager public roleManager;
 
@@ -24,7 +24,7 @@ contract VaultAccess {
         roleManager = RoleManager(_roleManager);
     }
 
-    /// @notice MODERATOR может пополнить контракт
+    /// @notice Allows MODERATORs to fund the vault
     function fundVault() external payable {
         if (roleManager.getRole(msg.sender) != RoleManager.Role.MODERATOR) revert Unauthorized();
 
@@ -32,7 +32,7 @@ contract VaultAccess {
         emit VaultFunded(msg.sender, msg.value);
     }
 
-    /// @notice USER может получить доступ к фиксированной сумме раз в сутки
+    /// @notice Allows USERs to claim a fixed amount once per day
     function accessVault() external {
         if (roleManager.getRole(msg.sender) != RoleManager.Role.USER) revert Unauthorized();
 
@@ -48,12 +48,13 @@ contract VaultAccess {
         emit VaultAccessed(msg.sender, reward);
     }
 
-    /// @notice Только для просмотра — сколько осталось до следующего доступа
+    /// @notice Returns remaining cooldown time before the next access is allowed
     function timeUntilNextAccess(address user) external view returns (uint) {
         uint next = lastAccess[user] + COOLDOWN;
         return block.timestamp >= next ? 0 : next - block.timestamp;
     }
 
+    /// @notice Allows receiving ETH directly to the vault
     receive() external payable {
         vaultBalance += msg.value;
     }
